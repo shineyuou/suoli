@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="测量时间(秒)"
+        android:textColor="#000"
+        android:textSize="@dimen/text_size" />
+
+    <RelativeLayout
+        android:id="@+id/measure_config_time_container"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginTop="15dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/measure_time_et"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="25dp"
+            android:layout_toLeftOf="@+id/add_minus_1"
+            android:background="@drawable/sp_border_0"
+            android:gravity="center"
+            android:inputType="number"
+            android:padding="5dp"
+            android:text="0S"
+            android:textColor="#000"
+            android:textSize="@dimen/text_size" />
+
+        <include
+            android:id="@+id/add_minus_1"
+            layout="@layout/part_add_minus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginHorizontal="10dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="采样频率（Hz）输入值0-1000"
+        android:textColor="#000"
+        android:textSize="@dimen/text_size" />
+
+    <TextView
+        android:id="@+id/tv_hz"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="17dp"
+        android:text="0"
+        android:textColor="#000"
+        android:textSize="@dimen/text_size" />
+
+    <SeekBar
+        android:id="@+id/sb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:max="1000"
+        android:thumb="@drawable/seekbar" />
+    <!--android:progressDrawable="@drawable/progress_holo_light"-->
+
+
+    <include
+        layout="@layout/part_ok_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp" />
+</LinearLayout>

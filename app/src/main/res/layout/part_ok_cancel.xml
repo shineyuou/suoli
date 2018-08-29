@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/part_save"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="20dp"
+        android:layout_weight="1"
+        android:background="@drawable/sp_border_bt_ok"
+        android:text="确 定"
+        android:textColor="#fff"
+        android:textSize="@dimen/text_size" />
+
+    <Button
+        android:id="@+id/part_cancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_weight="1"
+        android:background="@drawable/sp_border_bt_cancel"
+        android:text="取 消"
+        android:textColor="#787878"
+        android:textSize="@dimen/text_size" />
+</LinearLayout>

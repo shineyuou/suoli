@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UI.SelectCableActivity">
+
+    <TextView
+        android:id="@+id/hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="13dp"
+        android:layout_marginBottom="13dp"
+        android:text="请选择被测量的拉索"
+        android:textColor="@color/grey_text"
+        android:textSize="@dimen/text_size" />
+
+    <View
+        android:layout_width="match_parent"
+        android:background="@color/cut_off_line"
+        android:layout_height="0.5dp"
+        android:layout_below="@+id/hint" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/activity_select_cable"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/hint"
+        android:layout_marginTop="0.5dp" />
+</RelativeLayout>

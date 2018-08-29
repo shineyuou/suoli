@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/base_title_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/titlebar_height"
+        android:gravity="center_vertical">
+
+        <RelativeLayout
+            android:id="@+id/toolbar_back_container"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/titlebar_height">
+
+            <ImageView
+                android:id="@+id/bakc_icon"
+                android:layout_width="10dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/fh"
+                android:textColor="#fff"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/left_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="3dp"
+                android:layout_toRightOf="@+id/bakc_icon"
+                android:text="返回"
+                android:textColor="#fff"
+                android:textSize="@dimen/text_size" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/middle_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="@dimen/title_size" />
+
+        <FrameLayout
+            android:id="@+id/right_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"  />
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/base_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/base_title_container" />
+</RelativeLayout>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:layout_weight="3"
+            android:text="编号:"
+            android:textColor="#000"
+            android:textSize="@dimen/text_size" />
+
+        <EditText
+            android:id="@+id/cable_number"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="9"
+            android:background="@drawable/sp_border_0"
+            android:paddingLeft="5dp"
+            android:textSize="@dimen/text_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:layout_weight="3"
+            android:text="长度:"
+            android:textColor="#000"
+            android:textSize="@dimen/text_size" />
+
+        <EditText
+            android:id="@+id/cable_length"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="9"
+            android:background="@drawable/sp_border_0"
+            android:inputType="numberDecimal"
+            android:paddingLeft="5dp"
+            android:textSize="@dimen/text_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:layout_weight="3"
+            android:text="截面积(cm²):"
+            android:textColor="#000"
+            android:textSize="@dimen/text_size" />
+
+        <EditText
+            android:id="@+id/cable_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="9"
+            android:background="@drawable/sp_border_0"
+            android:inputType="numberDecimal"
+            android:paddingLeft="5dp"
+            android:textSize="@dimen/text_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:layout_weight="3"
+            android:text="密度(kg/m):"
+            android:textColor="#000"
+            android:textSize="@dimen/text_size" />
+
+        <EditText
+            android:id="@+id/cable_density"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="9"
+            android:background="@drawable/sp_border_0"
+            android:inputType="numberDecimal"
+            android:paddingLeft="5dp"
+            android:textSize="@dimen/text_size" />
+    </LinearLayout>
+
+    <include
+        layout="@layout/part_ok_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="26dp" />
+</LinearLayout>

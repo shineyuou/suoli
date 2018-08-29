@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="13dp"
+        android:text="振动信号实时频谱"
+        android:textColor="#000"
+        android:textSize="@dimen/text_size" />
+
+    <RelativeLayout
+        android:id="@+id/table_container"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@+id/hint"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
+
+        <TextView
+            android:id="@+id/suoli"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/cut_off_line"
+            android:gravity="center"
+            android:text="替换测量数据图"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/hz_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/table_container"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="17dp"
+        android:orientation="horizontal"
+        android:padding="2dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="基频:"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_size" />
+
+        <TextView
+            android:id="@+id/hz_et"
+            android:layout_width="65dp"
+            android:layout_height="23dp"
+            android:layout_marginLeft="2dp"
+            android:background="@drawable/sp_border_bottom_05"
+            android:gravity="center"
+            android:padding="2dp"
+            android:textColor="@color/info_text_color" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:text="Hz"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/hz_container"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:padding="2dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="索力:"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_size" />
+
+        <TextView
+            android:id="@+id/n_et"
+            android:layout_width="65dp"
+            android:layout_height="23dp"
+            android:layout_marginLeft="2dp"
+            android:background="@drawable/sp_border_bottom_05"
+            android:gravity="center"
+            android:padding="2dp"
+            android:textColor="@color/info_text_color" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:text="N"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_size" />
+    </LinearLayout>
+</RelativeLayout>
