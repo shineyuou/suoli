@@ -2,14 +2,13 @@ package com.annis.tensioncable.UI;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -17,7 +16,20 @@ import android.widget.TextView;
 import com.annis.appbase.base.BaseActivity;
 import com.annis.appbase.base.BasePresenter;
 import com.annis.appbase.base.TitleBean;
+import com.annis.tensioncable.My.Compare;
 import com.annis.tensioncable.R;
+
+import org.achartengine.ChartFactory;
+import org.achartengine.GraphicalView;
+import org.achartengine.model.XYMultipleSeriesDataset;
+import org.achartengine.model.XYSeries;
+import org.achartengine.renderer.XYMultipleSeriesRenderer;
+import org.achartengine.renderer.XYSeriesRenderer;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -28,14 +40,42 @@ public class TelMeasure extends BaseActivity {
     private static final int START=1,PAUSE=2,STOP=0;
     private int status_flag;
 
+
+    private static final int HZ_50=1,HZ_200=0;
+    private static final int XNUM=400;// x轴长度,即屏幕中显示的点数
+
+
+    private float light[] = {0, 0, 0};
+    private int[] colors = new int[]{Color.GREEN, Color.RED, Color.rgb(255, 69, 0),
+            Color.BLACK};
+    private String[] titles = new String[]{"X", "Y", "Z"};// 图表一的图例
+    private String[] xkedu;// x轴数据缓冲
+    private List<Float> dataList; // 存放数据的集合
+    private List<XYSeries> seriesList;
+    private List<Float[]> catchList;// 存放缓存数据的集合
+    private GraphicalView mChartView;
+    private XYMultipleSeriesDataset dataset;
+    private XYMultipleSeriesRenderer mRenderer;
+
+    private Timer timer;
+    private Handler handle;
+    private SimpleDateFormat nowTime; // 获取当前时间
+
+    private android.hardware.SensorManager SensorManager;
+    private android.hardware.Sensor Sensor;
+    private MyListener Listener;
+    private XYMultipleSeriesDataset mDataSet;
+    private XYMultipleSeriesRenderer mRender;
+
     @BindView(R.id.item_status_iv)
     ImageView status_iv;
+
+    @BindView(R.id.char1)
+    LinearLayout Char1;
 
     @BindView(R.id.item_status_tv)
     TextView status_tv;
 
-    @BindView(R.id.LL)
-    TextView ll;
     @SuppressLint("HandlerLeak")
     private Handler set_status_tv=new Handler(){
         @SuppressLint("SetTextI18n")
@@ -44,19 +84,86 @@ public class TelMeasure extends BaseActivity {
             super.handleMessage(msg);
             switch (status_flag){
                 case START:
-                    ll.setText(""+msg.obj);
+                    updatechart();
                 default:
                     break;
             }
         }
     };
 
+    /**
+     * 更新数据
+     */
+    private void updatechart() {
+        float dataOne = light[0];
+        float dataTwo = light[1];
+        float dataThree = light[2];
+        dataList.clear();
+        dataList.add(dataOne);
+        dataList.add(dataTwo);
+        dataList.add(dataThree);
+        String xKeduValue = nowTime.format(new java.util.Date());
+        //得到x轴上点的数量
+        int seriesItemLenght = seriesList.get(0).getItemCount();
+        // x轴控制显示10个数值
+        if (seriesItemLenght > XNUM) {
+            seriesItemLenght = XNUM;
+        }
+        // 移除旧的点集
+        for (int i = 0; i < titles.length; i++) {
+            dataset.removeSeries(seriesList.get(i));
+        }
+
+        if (seriesItemLenght < XNUM) {
+            for (int i = 0; i < titles.length; i++) {
+                seriesList.get(i).add(seriesItemLenght + 1, dataList.get(i));
+            }
+            //renderer.addXTextLabel(seriesItemLenght + 1, xKeduValue);
+            xkedu[seriesItemLenght] = xKeduValue;
+        } else {
+            // 将x,y数值缓存
+            for (int i = 0; i < seriesItemLenght - 1; i++) {
+                for (int j = 0; j < titles.length; j++) {
+                    catchList.get(j)[i] = (float) seriesList.get(j).getY(i + 1);
+                }
+                xkedu[i] = xkedu[i + 1];
+            }
+            // 移除旧点
+            for (int i = 0; i < titles.length; i++) {
+                seriesList.get(i).clear();
+            }
+            // 添加新点,变换坐标
+            double maxy1[] = new double[3];
+            double miny1[] = new double[3];
+            for (int i = 0; i < seriesItemLenght - 1; i++) {
+                for (int j = 0; j < titles.length; j++) {
+                    seriesList.get(j).add(i + 1, catchList.get(j)[i]);
+                    //获取最大最小值
+                    maxy1[j] = seriesList.get(j).getMaxY();
+                    miny1[j] = seriesList.get(j).getMinY();
+
+                }
+                //renderer.addXTextLabel(i + 1, xkedu[i]);
+            }
+            double maxY = Compare.max(maxy1, 3);
+            double minY =Compare.min(miny1, 3);
+            xkedu[XNUM - 1] = xKeduValue;
+            for (int i = 0; i < titles.length; i++) {
+                seriesList.get(i).add(XNUM, dataList.get(i));
+            }
+            mRenderer.setYAxisMin(minY-3);// Y最小值
+            mRenderer.setYAxisMax(maxY+3);// Y最小值
+        }
+        for (int i = 0; i < titles.length; i++) {
+            dataset.addSeries(seriesList.get(i));
+        }
+        mChartView.invalidate();
+    }
+
     @BindView(R.id.part_right_menu)
     LinearLayout right_menu;
 
-    private android.hardware.SensorManager SensorManager;
-    private android.hardware.Sensor Sensor;
-    private MyListener Listener;
+
 
     @Override
     protected int getLayout() {
@@ -80,7 +187,109 @@ public class TelMeasure extends BaseActivity {
         SensorManager = (android.hardware.SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor = SensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER);
         Listener = new MyListener();
-        SensorManager.registerListener(Listener, Sensor, android.hardware.SensorManager.SENSOR_DELAY_GAME);
+        SensorManager.registerListener(Listener, Sensor,HZ_200);
+
+        initview();
+        createView();
+
+    }
+
+    private void createView() {
+        mChartView = ChartFactory.getCubeLineChartView(this, getDataSet(), getRender(), 0.3f);
+        Char1.removeAllViews();
+        Char1.addView(mChartView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    /**
+     * 初始化图表
+     */
+    @SuppressLint("SimpleDateFormat")
+    private void initview() {
+        timer = new Timer();
+        Float[] catchOne = new Float[XNUM];
+        Float[] catchTwo = new Float[XNUM];
+        Float[] catchThree = new Float[XNUM];
+        xkedu = new String[XNUM];
+        dataList = new ArrayList<>();
+        nowTime = new SimpleDateFormat("mm:ss");
+        seriesList = new ArrayList<>();
+        catchList = new ArrayList<>();
+        catchList.add(catchOne);
+        catchList.add(catchTwo);
+        catchList.add(catchThree);
+    }
+
+    public XYMultipleSeriesDataset getDataSet() {
+        dataset = new XYMultipleSeriesDataset();
+        addXYSeries(dataset, titles, 0);
+        return dataset;
+    }
+
+    private void addXYSeries(XYMultipleSeriesDataset dataset, String[] titles, int i) {
+        for (String title : titles) {
+            XYSeries series = new XYSeries(title, i);
+            seriesList.add(series);
+            dataset.addSeries(series);
+        }
+    }
+
+    public XYMultipleSeriesRenderer getRender() {
+        mRenderer = new XYMultipleSeriesRenderer();
+        setRenderer(mRenderer, colors);
+        mRenderer.setPointSize(5.5f);
+        int yMin = -5;
+        int yMax = 15;
+        String chartLineTitle = this.getString(R.string.ownchar1);
+        setChartSettings(mRenderer, chartLineTitle, "", null/*yMessage*/, 0.0,
+                yMin, yMax, Color.BLACK, Color.BLACK);// 设置图表的X轴，Y轴,标题
+        mRenderer.setXLabels(0);// 取消x轴的数字,动态设置
+        mRenderer.setYLabels(10);// Y轴均分10项
+        mRenderer.setShowGrid(true);// 显示表格
+        mRenderer.setXLabelsAlign(Paint.Align.RIGHT);// 右对齐
+        mRenderer.setYLabelsAlign(Paint.Align.RIGHT);
+        mRenderer.setZoomButtonsVisible(false);// 不显示放大缩小
+        mRenderer.setClickEnabled(true);// 不允许放大或缩小
+        mRenderer.setPanEnabled(false, false);// 上下左右都不可以移动
+        mRenderer.setBarSpacing(0.5);
+        return mRenderer;
+    }
+
+    // 图表样式设置
+    protected void setChartSettings(XYMultipleSeriesRenderer renderer,
+                                    String title, String xTitle, String yTitle, double xMin,
+                                    double yMin, double yMax, int axesColor, int labelsColor) {
+        renderer.setChartTitle(title);
+        renderer.setXTitle(xTitle);// X轴标题
+        renderer.setYTitle("加速度");// Y轴标题
+        renderer.setXAxisMin(xMin);// X最小值
+        renderer.setYAxisMin(yMin);// Y最小值
+        renderer.setYAxisMax(yMax);// Y最小值
+        renderer.setAxesColor(axesColor);// 轴的颜色
+        renderer.setLabelsColor(labelsColor);// 标题的颜色
+    }
+
+    /**
+     * 设置描绘器属性
+     */
+    protected void setRenderer(XYMultipleSeriesRenderer renderer, int[] colors) {
+        renderer.setAxisTitleTextSize(40);//设置轴标题的大小
+        renderer.setChartTitleTextSize(40);//设置图标标题的大小
+        renderer.setLabelsTextSize(40);//轴刻度文字大小
+        renderer.setLegendTextSize(30);//图例文字的大小
+        //renderer.setPointSize(5f);
+        renderer.setMargins(new int[]{0, 80, 0, 0});// 上,左,下,右
+        renderer.setMarginsColor(Color.argb(0,255,255,255));//设置图标边框的颜色
+
+        for (int i = 0; i < titles.length; i++) {
+            XYSeriesRenderer r = new XYSeriesRenderer();
+            r.setColor(colors[i]);
+            r.setDisplayChartValues(false);//设置是否显示线上点的值
+            r.setLineWidth(2f);// 宽度
+            r.setFillPoints(true);// 完全填充
+            r.setChartValuesSpacing(0);
+            renderer.addSeriesRenderer(r);
+        }
     }
 
     public class MyListener implements SensorEventListener {
@@ -88,7 +297,7 @@ public class TelMeasure extends BaseActivity {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             Message msg = new Message();
-            msg.obj=sensorEvent.values[2];
+            light=sensorEvent.values;
             set_status_tv.sendMessage(msg);
         }
 
@@ -99,7 +308,6 @@ public class TelMeasure extends BaseActivity {
 
     @Override
     protected void laodData() {
-
 
     }
 
@@ -188,44 +396,6 @@ public class TelMeasure extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SensorManager.unregisterListener(Listener);
-        Log.i(TAG, "onDestroy");
+        SensorManager.unregisterListener(Listener,Sensor);
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.i(TAG, "onResume");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.i(TAG, "onPause");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.i(TAG, "onStop");
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.i(TAG, "onRestart");
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.i(TAG, "onCreate");
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.i(TAG, "onStart");
-    }
-
 }

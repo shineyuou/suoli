@@ -119,14 +119,12 @@
         android:layout_below="@+id/list_hint"
         android:layout_margin="8dp">
 
-        <TextView
-            android:id="@+id/LL"
+        <LinearLayout
+            android:id="@+id/char1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#cecece"
-            android:gravity="center"
-            android:text="测量图替换部分"
-            android:textSize="@dimen/item_text_size"/>
+            android:orientation="vertical">
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
