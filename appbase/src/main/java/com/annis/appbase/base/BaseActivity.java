@@ -186,9 +186,22 @@ public abstract class BaseActivity<T extends BasePresenter> extends AppCompatAct
         startActivity(intent);
     }
 
+    public void startAcitvity(Class clazz, String filepath) {
+        Intent intent = new Intent(this, clazz);
+        intent.putExtra("filepath", filepath);
+        startActivity(intent);
+    }
+
     public void startAcitvity(Class clazz, Parcelable object) {
         Intent intent = new Intent(this, clazz);
         intent.putExtra("object", object);
+        startActivity(intent);
+    }
+
+    public void startAcitvity(Class clazz, Parcelable object, String filepath) {
+        Intent intent = new Intent(this, clazz);
+        intent.putExtra("object", object);
+        intent.putExtra("filepath",filepath);
         startActivity(intent);
     }
 

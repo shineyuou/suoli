@@ -1,6 +1,7 @@
 package com.annis.tensioncable.UI;
 
 import android.Manifest;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -9,6 +10,7 @@ import com.annis.appbase.base.BasePresenter;
 import com.annis.appbase.base.TitleBean;
 import com.annis.tensioncable.R;
 
+import java.io.File;
 import java.util.Date;
 
 import butterknife.BindColor;
@@ -56,6 +58,24 @@ public class MainActivity extends BaseActivity {
             @Override
             public void hasPermission() {
                 Log.i(TAG, "申请到sd卡权限");
+                File sd = Environment.getExternalStorageDirectory();
+                String mPath = sd.getPath() + "/1";
+                File file = new File(mPath);
+                if (!file.exists()) {
+                    file.mkdir();
+                }
+                sd = Environment.getExternalStorageDirectory();
+                mPath = sd.getPath() + "/1/手机";
+                file = new File(mPath);
+                if (!file.exists()) {
+                    file.mkdir();
+                }
+                sd = Environment.getExternalStorageDirectory();
+                mPath = sd.getPath() + "/1/节点";
+                file = new File(mPath);
+                if (!file.exists()) {
+                    file.mkdir();
+                }
             }
 
             @Override

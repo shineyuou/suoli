@@ -5,16 +5,12 @@
     android:background="#ffffff"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="13dp"
-        android:text="振动信号实时频谱"
-        android:textColor="#000"
-        android:textSize="@dimen/text_size" />
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/char2"
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+    </com.github.mikephil.charting.charts.LineChart>
 
     <RelativeLayout
         android:id="@+id/table_container"
@@ -22,12 +18,15 @@
         android:layout_height="200dp"
         android:layout_below="@+id/hint"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
+        android:layout_marginRight="10dp"
+        android:visibility="invisible">
 
         <TextView
             android:id="@+id/suoli"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:background="@color/cut_off_line"
             android:gravity="center"
             android:text="替换测量数据图"/>

@@ -5,8 +5,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -18,6 +20,8 @@ import com.annis.appbase.base.BasePresenter;
 import com.annis.appbase.base.TitleBean;
 import com.annis.tensioncable.My.Compare;
 import com.annis.tensioncable.R;
+import com.annis.tensioncable.Utils.Constants;
+import com.annis.tensioncable.Utils.ConstantsSP;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -26,6 +30,9 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +44,12 @@ import butterknife.OnClick;
 
 public class TelMeasure extends BaseActivity {
     private static final String TAG = "TelMeasure";
-    private static final int START=1,PAUSE=2,STOP=0;
+    private static final int START = 1, PAUSE = 2, STOP = 0;
     private int status_flag;
 
 
-    private static final int HZ_50=1,HZ_200=0;
-    private static final int XNUM=400;// x轴长度,即屏幕中显示的点数
+    private static final int HZ_50 = 1, HZ_200 = 0;
+    private static final int XNUM = 400;// x轴长度,即屏幕中显示的点数
 
 
     private float light[] = {0, 0, 0};
@@ -67,6 +74,11 @@ public class TelMeasure extends BaseActivity {
     private XYMultipleSeriesDataset mDataSet;
     private XYMultipleSeriesRenderer mRender;
 
+    private Integer limit_Time;
+    private int Count = 0;
+
+    private String filename;
+
     @BindView(R.id.item_status_iv)
     ImageView status_iv;
 
@@ -77,19 +89,24 @@ public class TelMeasure extends BaseActivity {
     TextView status_tv;
 
     @SuppressLint("HandlerLeak")
-    private Handler set_status_tv=new Handler(){
+    private Handler set_status_tv = new Handler() {
         @SuppressLint("SetTextI18n")
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (status_flag){
+            switch (status_flag) {
                 case START:
+                    if (msg.what == (limit_Time * 200)) {
+                        SensorManager.unregisterListener(Listener, Sensor);
+                        setStatus(2);
+                    }
                     updatechart();
                 default:
                     break;
             }
         }
     };
+    private File mfile;
 
     /**
      * 更新数据
@@ -103,6 +120,7 @@ public class TelMeasure extends BaseActivity {
         dataList.add(dataTwo);
         dataList.add(dataThree);
         String xKeduValue = nowTime.format(new java.util.Date());
+        Log.i(TAG, "" + xKeduValue);
         //得到x轴上点的数量
         int seriesItemLenght = seriesList.get(0).getItemCount();
         // x轴控制显示10个数值
@@ -146,13 +164,13 @@ public class TelMeasure extends BaseActivity {
                 //renderer.addXTextLabel(i + 1, xkedu[i]);
             }
             double maxY = Compare.max(maxy1, 3);
-            double minY =Compare.min(miny1, 3);
+            double minY = Compare.min(miny1, 3);
             xkedu[XNUM - 1] = xKeduValue;
             for (int i = 0; i < titles.length; i++) {
                 seriesList.get(i).add(XNUM, dataList.get(i));
             }
-            mRenderer.setYAxisMin(minY-3);// Y最小值
-            mRenderer.setYAxisMax(maxY+3);// Y最小值
+            mRenderer.setYAxisMin(minY - 3);// Y最小值
+            mRenderer.setYAxisMax(maxY + 3);// Y最小值
         }
         for (int i = 0; i < titles.length; i++) {
             dataset.addSeries(seriesList.get(i));
@@ -162,7 +180,6 @@ public class TelMeasure extends BaseActivity {
 
     @BindView(R.id.part_right_menu)
     LinearLayout right_menu;
-
 
 
     @Override
@@ -187,7 +204,6 @@ public class TelMeasure extends BaseActivity {
         SensorManager = (android.hardware.SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor = SensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER);
         Listener = new MyListener();
-        SensorManager.registerListener(Listener, Sensor,HZ_200);
 
         initview();
         createView();
@@ -212,7 +228,7 @@ public class TelMeasure extends BaseActivity {
         Float[] catchThree = new Float[XNUM];
         xkedu = new String[XNUM];
         dataList = new ArrayList<>();
-        nowTime = new SimpleDateFormat("mm:ss");
+        nowTime = new SimpleDateFormat("hh-mm-ss");
         seriesList = new ArrayList<>();
         catchList = new ArrayList<>();
         catchList.add(catchOne);
@@ -279,7 +295,7 @@ public class TelMeasure extends BaseActivity {
         renderer.setLegendTextSize(30);//图例文字的大小
         //renderer.setPointSize(5f);
         renderer.setMargins(new int[]{0, 80, 0, 0});// 上,左,下,右
-        renderer.setMarginsColor(Color.argb(0,255,255,255));//设置图标边框的颜色
+        renderer.setMarginsColor(Color.argb(0, 255, 255, 255));//设置图标边框的颜色
 
         for (int i = 0; i < titles.length; i++) {
             XYSeriesRenderer r = new XYSeriesRenderer();
@@ -297,7 +313,18 @@ public class TelMeasure extends BaseActivity {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             Message msg = new Message();
-            light=sensorEvent.values;
+            light = sensorEvent.values;
+            String s = sensorEvent.timestamp + "," + String.valueOf(light[0]) + "," + String.valueOf(light[1])
+                    + "," + String.valueOf(light[2]) + "\n";
+            try {
+                FileOutputStream fos = new FileOutputStream(mfile, true);
+                fos.write(s.getBytes());
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Count++;
+            msg.what = Count;
             set_status_tv.sendMessage(msg);
         }
 
@@ -314,24 +341,44 @@ public class TelMeasure extends BaseActivity {
     //点击索力分析
     @OnClick(R.id.right_view)
     void back(View view) {
-        startAcitvity(SelectCableActivity.class);
+        startAcitvity(SelectCableActivity.class,mfile.getPath());
     }
 
     //开始
     @OnClick(R.id.controler_start)
     void start(View view) {
+        limit_Time = ConstantsSP.getInstance(this).getValue(Constants.SP.MeasureTime, 10);
+        filename = nowTime.format(new java.util.Date());
+        mfile = new File(Environment.getExternalStorageDirectory() + "/1/手机", filename + ".csv");
+        SensorManager.registerListener(Listener, Sensor, HZ_200);
         setStatus(1);
     }
 
     //暂停
     @OnClick(R.id.controler_pause)
     void pause(View view) {
+        SensorManager.unregisterListener(Listener, Sensor);
+        if (filename!=null&&Count!=(limit_Time * 200)){
+            mfile = new File(Environment.getExternalStorageDirectory() + "/1/手机", filename + ".csv");
+            if (mfile.isFile() && mfile.exists()) {
+                mfile.delete();
+                filename=null;
+            }
+        }
         setStatus(2);
     }
 
     //停止
     @OnClick(R.id.controler_stop)
     void stop(View view) {
+        SensorManager.unregisterListener(Listener, Sensor);
+        if (filename!=null&&Count!=(limit_Time * 200)){
+            mfile = new File(Environment.getExternalStorageDirectory() + "/1/手机", filename + ".csv");
+            if (mfile.isFile() && mfile.exists()) {
+                mfile.delete();
+                filename=null;
+            }
+        }
         setStatus(0);
     }
 
@@ -374,19 +421,20 @@ public class TelMeasure extends BaseActivity {
              * 测量状态 0: 已停止 1.测量中 2.已暂停
              */
             case STOP:
-                status_flag=STOP;
+                status_flag = STOP;
                 status_iv.setImageResource(R.drawable.tz_two);
                 status_tv.setText("已停止");
                 status_tv.setTextColor(getResources().getColor(R.color.colorPrimary));
                 break;
             case START:
-                status_flag=START;
+                Count = 0;
+                status_flag = START;
                 status_iv.setImageResource(R.drawable.ks);
                 status_tv.setText("测量中");
                 status_tv.setTextColor(Color.rgb(255, 0, 0));
                 break;
             case PAUSE:
-                status_flag=PAUSE;
+                status_flag = PAUSE;
                 status_iv.setImageResource(R.drawable.zt_two);
                 status_tv.setText("已暂停");
                 status_tv.setTextColor(Color.rgb(0, 89, 255));
@@ -396,6 +444,6 @@ public class TelMeasure extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SensorManager.unregisterListener(Listener,Sensor);
+        SensorManager.unregisterListener(Listener, Sensor);
     }
 }

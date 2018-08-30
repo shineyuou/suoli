@@ -1,16 +1,10 @@
 package com.annis.tensioncable.UI;
 
-import android.view.View;
-
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
+import android.content.Intent;
+import android.widget.Toast;
 
 import com.annis.appbase.base.BaseActivity;
 import com.annis.appbase.base.BasePresenter;
-import com.annis.appbase.base.OnRVItemClickListener;
 import com.annis.appbase.base.TitleBean;
 import com.annis.tensioncable.R;
 import com.annis.tensioncable.Utils.Constants;
@@ -21,11 +15,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+
 public class SelectCableActivity extends BaseActivity {
     @BindView(R.id.activity_select_cable)
     RecyclerView rv;
     CableSelectAdapter adapter;
     List<TensionCable> cables = new ArrayList<>();
+    private String filepath;
 
     @Override
     protected int getLayout() {
@@ -44,7 +45,11 @@ public class SelectCableActivity extends BaseActivity {
 
     @Override
     protected void initViewAndEvent() {
+        Intent intent = getIntent();
+        filepath = intent.getStringExtra("filepath");
+        Toast.makeText(this, filepath,Toast.LENGTH_SHORT).show();
         rv.setLayoutManager(new LinearLayoutManager(this));
+
         DividerItemDecoration decoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         decoration.setDrawable(Objects.requireNonNull(ContextCompat.getDrawable(this, R.drawable.custom_divider)));
         rv.addItemDecoration(decoration);
@@ -76,6 +81,6 @@ public class SelectCableActivity extends BaseActivity {
     private void selected(int selectedIndex) {
         TensionCable cable = cables.get(selectedIndex);
         showToast(cable.getName() + "被选中");
-        startAcitvity(AnalyzeActivity.class, cable);
+        startAcitvity(AnalyzeActivity.class, cable,filepath);
     }
 }
