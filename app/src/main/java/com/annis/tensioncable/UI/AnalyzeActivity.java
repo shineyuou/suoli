@@ -1,15 +1,19 @@
 package com.annis.tensioncable.UI;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.annis.appbase.base.BaseActivity;
 import com.annis.appbase.base.BasePresenter;
 import com.annis.appbase.base.TitleBean;
+import com.annis.tensioncable.FFT.Calculate;
+import com.annis.tensioncable.FFT.Complex;
+import com.annis.tensioncable.FFT.Fft;
 import com.annis.tensioncable.My.MyMarkerView;
 import com.annis.tensioncable.R;
 import com.annis.tensioncable.Utils.Constants;
@@ -24,7 +28,11 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.Utils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import androidx.core.content.ContextCompat;
 import butterknife.BindView;
@@ -49,10 +57,28 @@ public class AnalyzeActivity extends BaseActivity {
 
     @BindView(R.id.char2)
     LineChart mChart;
+    /**
+     *横截面积
+     */
     private double mCsa;
+    /**
+     * 密度
+     */
     private double mDensity;
+    /**
+     * 长度
+     */
     private double mLength;
+    private double fsDegree;//输出频谱间隔
+    private double force;//索力大小
+
+    private ArrayList<Float> fre;//保存频谱幅值
+    private double fss=200;//采样频率
+    private double preFre=0.03;//基频的预估计值
+
     private String mName;
+    private String mFilenamne;
+
 
     @Override
     protected int getLayout() {
@@ -71,6 +97,7 @@ public class AnalyzeActivity extends BaseActivity {
 
     @Override
     protected void initViewAndEvent() {
+        fre=new ArrayList<>();
         item = (TensionCable) getIntentObj();
         mCsa = item.getCSA();
         mDensity = item.getDensity();
@@ -79,14 +106,11 @@ public class AnalyzeActivity extends BaseActivity {
         Integer frequency = ConstantsSP.getInstance(this).getValue(Constants.SP.MeasureFrequency, 200);
 
         Intent intent = getIntent();
-        String filenamne = intent.getStringExtra("filepath");
-        Toast.makeText(this,filenamne,Toast.LENGTH_LONG).show();
+        mFilenamne = intent.getStringExtra("filepath");
 
         initchart(mChart);
         //TODO 设置数据
-        setContent("1000", "10000");
 
-        updatachart();
     }
 
     private void initchart(LineChart char2) {
@@ -118,18 +142,60 @@ public class AnalyzeActivity extends BaseActivity {
 
     @Override
     protected void laodData() {
+        ArrayList<Float> predata = filetofloat(mFilenamne);
+        operate(predata);
+        ArrayList<Entry> entries = new ArrayList<>();
+        for (int i = 0; i < fre.size(); i++) {
+            entries.add(new Entry((float) (i*fsDegree),fre.get(i)));
+            Log.i("x轴的值", ""+(float) (i*fsDegree));
+        }
+        updatachart(entries);
 
     }
 
-    private void updatachart() {
+    private void operate(ArrayList<Float> inData){
+        int num = (int) Math.floor(Math.log(inData.size()) / Math.log(2));
+        int n = (int) Math.pow(2, num);
+        fsDegree = fss / n;// 采样频率/采样个数
+        Complex[] x = new Complex[n];
+        //origin data
+        for (int i = 0; i < n; i++) {
+            x[i] = new Complex(inData.get(i));
+        }
+        Complex[] y = Fft.fft(x);
+        fre = Fft.obtainFreSpectrum(y, n);
+        fre.set(0,fre.get(1));
+        double frequency = Fft.findFre(y, fss, n, preFre);
+        Calculate cal = new Calculate(frequency, mDensity, mLength);
+        force = cal.cableForce();
+        setContent(frequency,force);
+    }
+
+    private ArrayList<Float> filetofloat(String filepath){
+        ArrayList<Float> shuju = new ArrayList<>();
+        File file = new File(filepath);
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            Scanner scanner = new Scanner(fis, "utf-8");
+            int i=0;
+            while (scanner.hasNextLine()){
+                String s = scanner.nextLine().split(",")[3];
+                shuju.add(Float.valueOf(s));
+                i++;
+            }
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return shuju;
+    }
+
+    private void updatachart(ArrayList<Entry> value) {
         /**
          * 添加数据
          */
         if (Values.isEmpty()){
-            for (int i = 0; i < 512; i++) {
-                double random = Math.random();
-                Values.add(new Entry((float) (i*0.2), (float) random+12));
-            }
+            Values=value;
         }
 
         /** mChart.getData():获取图标中线的数组
@@ -188,8 +254,9 @@ public class AnalyzeActivity extends BaseActivity {
      * @param Hz
      * @param N
      */
-    private void setContent(String Hz, String N) {
-        et_Hz.setText(Hz);
-        et_N.setText(N);
+    @SuppressLint("SetTextI18n")
+    private void setContent(double Hz, double N) {
+        et_Hz.setText(""+Hz);
+        et_N.setText(""+N);
     }
 }
