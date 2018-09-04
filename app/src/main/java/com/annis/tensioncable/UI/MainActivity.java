@@ -18,7 +18,9 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-
+/**
+ * liang
+ */
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
     /***  图片比例  ***/
