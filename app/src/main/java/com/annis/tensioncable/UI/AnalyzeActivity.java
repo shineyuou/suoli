@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.annis.appbase.base.BaseActivity;
@@ -147,7 +146,6 @@ public class AnalyzeActivity extends BaseActivity {
         ArrayList<Entry> entries = new ArrayList<>();
         for (int i = 0; i < fre.size(); i++) {
             entries.add(new Entry((float) (i*fsDegree),fre.get(i)));
-            Log.i("x轴的值", ""+(float) (i*fsDegree));
         }
         updatachart(entries);
 
@@ -179,8 +177,14 @@ public class AnalyzeActivity extends BaseActivity {
             Scanner scanner = new Scanner(fis, "utf-8");
             int i=0;
             while (scanner.hasNextLine()){
-                String s = scanner.nextLine().split(",")[3];
-                shuju.add(Float.valueOf(s));
+                String[] split = scanner.nextLine().split(",");
+                if (split.length>2) {
+                    String s = split[3];
+                    shuju.add(Float.valueOf(s));
+                }else {
+                    String s = split[1];
+                    shuju.add(Float.valueOf(s));
+                }
                 i++;
             }
             fis.close();

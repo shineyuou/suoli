@@ -1,5 +1,7 @@
 package com.annis.tensioncable.UI;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -41,15 +43,25 @@ public class MeasureConfigSetting extends BaseActivity {
 
     int MeasureTime, MeasureFrequency;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void initViewAndEvent() {
-        time_container.findViewById(R.id.part_add).setOnClickListener(v -> setTime(1));
-        time_container.findViewById(R.id.part_minus).setOnClickListener(v -> setTime(-1));
+        Intent intent = getIntent();
+        String flag = intent.getStringExtra("filepath");
+
+        time_container.findViewById(R.id.part_add).setOnClickListener(v -> setTime(5));
+        time_container.findViewById(R.id.part_minus).setOnClickListener(v -> setTime(-5));
         MeasureTime = ConstantsSP.getInstance(this).getValue(Constants.SP.MeasureTime, 0);
         MeasureFrequency = ConstantsSP.getInstance(this).getValue(Constants.SP.MeasureFrequency, 0);
         et_time.setText(MeasureTime + "S");
         hz.setText("" + MeasureFrequency);
-        seekBar.setProgress(MeasureFrequency);
+        if (flag!=null){
+            seekBar.setProgress(200);
+            hz.setText(200 + "");
+            seekBar.setEnabled(false);
+        }else{
+            seekBar.setProgress(MeasureFrequency);
+        }
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -76,8 +88,9 @@ public class MeasureConfigSetting extends BaseActivity {
     /**
      * 设置时间
      *
-     * @param item_step
+     * @param item_step 进度位置
      */
+    @SuppressLint("SetTextI18n")
     private void setTime(int item_step) {
         if ((MeasureTime + item_step) < 0) {
             return;
@@ -91,6 +104,7 @@ public class MeasureConfigSetting extends BaseActivity {
      *
      * @param frequency_step
      */
+    @SuppressLint("SetTextI18n")
     private void setFrequency(int frequency_step) {
         hz.setText(frequency_step + "");
         MeasureFrequency = frequency_step;

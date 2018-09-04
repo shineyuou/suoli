@@ -53,7 +53,7 @@ public class MainActivity extends BaseActivity {
             startAcitvity(About.class);
             finish();
         }
-        setTopImage();
+        //setTopImage();
         performCodeWithPermission("保存数据到SD卡中", new PermissionCallback() {
             @Override
             public void hasPermission() {

@@ -11,7 +11,6 @@ import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.utils.MPPointF;
-import com.github.mikephil.charting.utils.Utils;
 
 /**
  * Custom implementation of the MarkerView.
@@ -39,10 +38,12 @@ public class MyMarkerView extends MarkerView {
 
             CandleEntry ce = (CandleEntry) e;
 
-            tvContent.setText("" + Utils.formatNumber(ce.getHigh(), 0, true));
+            //tvContent.setText("" + Utils.formatNumber(ce.getHigh(), 0, true));
+            tvContent.setText("" + ce.getHigh());
         } else {
 
-            tvContent.setText("" + Utils.formatNumber(e.getX(), 200, true));
+            //tvContent.setText("" + Utils.formatNumber(e.getX(), 200, true));
+            tvContent.setText("" + e.getX());
         }
 
         super.refreshContent(e, highlight);

@@ -76,6 +76,7 @@ public class TelMeasure extends BaseActivity {
 
     private Integer limit_Time;
     private int Count = 0;
+    private File mfile;
 
     private String filename;
 
@@ -106,7 +107,7 @@ public class TelMeasure extends BaseActivity {
             }
         }
     };
-    private File mfile;
+
 
     /**
      * 更新数据
@@ -404,7 +405,7 @@ public class TelMeasure extends BaseActivity {
     //测量参数设置
     @OnClick(R.id.tel_measure_setting)
     void setConfig(View view) {
-        startAcitvity(MeasureConfigSetting.class);
+        startAcitvity(MeasureConfigSetting.class,"false");
         right_menu.setVisibility(View.GONE);
     }
 

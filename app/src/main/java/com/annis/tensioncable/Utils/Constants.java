@@ -37,14 +37,12 @@ public class Constants {
             if (!TextUtils.isEmpty(json)) {
                 tensionCables = new Gson().fromJson(json, new TypeToken<List<TensionCable>>() {
                 }.getType());
+            } else {
+                tensionCables = new ArrayList<>();
             }
 
             if (tensionCables == null) {
                 tensionCables = new ArrayList<>();
-                tensionCables.add(new TensionCable("拉索1", 1000.5, 50.51, 11.1));
-                tensionCables.add(new TensionCable("拉索2", 1000.5, 50.51, 11.1));
-                tensionCables.add(new TensionCable("拉索3", 1000.5, 50.51, 11.1));
-                tensionCables.add(new TensionCable("拉索4", 1000.5, 50.51, 11.1));
                 saveTensionCables(context, tensionCables);
             }
             return tensionCables;

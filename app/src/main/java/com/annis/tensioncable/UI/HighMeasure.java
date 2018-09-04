@@ -1,25 +1,29 @@
 package com.annis.tensioncable.UI;
 
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.OnClick;
-
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.view.View;
 import android.widget.LinearLayout;
 
 import com.annis.appbase.base.BaseActivity;
 import com.annis.appbase.base.BasePresenter;
 import com.annis.appbase.base.TitleBean;
+import com.annis.tensioncable.My.IpScanner;
+import com.annis.tensioncable.My.TcpService;
 import com.annis.tensioncable.R;
-import com.annis.tensioncable.Utils.Constants;
 import com.annis.tensioncable.adapter.EquipmentAdapter;
 import com.annis.tensioncable.model.Equipment;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import butterknife.OnClick;
 
 
 public class HighMeasure extends BaseActivity {
@@ -31,6 +35,10 @@ public class HighMeasure extends BaseActivity {
 
     List<Equipment> datas = new ArrayList<>();
     EquipmentAdapter adapter;
+
+    ArrayList<String> mmac=new ArrayList<>();
+    ArrayList<String> mip=new ArrayList<>();
+    private IpScanner mIpScanner;
 
     @Override
     protected int getLayout() {
@@ -47,8 +55,11 @@ public class HighMeasure extends BaseActivity {
         return null;
     }
 
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void initViewAndEvent() {
+        setFlag(false);
+        startService(new Intent(HighMeasure.this, TcpService.class));
         right_menu.setVisibility(View.GONE);
         listView.setLayoutManager(new LinearLayoutManager(this));
         //添加自定义分割线
@@ -57,9 +68,28 @@ public class HighMeasure extends BaseActivity {
         listView.addItemDecoration(divider);
         adapter = new EquipmentAdapter(this);
         listView.setAdapter(adapter);
-        adapter.setOnRvItemClickListener((itemView, position) -> startAcitvity(EquipmentDataActivity.class, adapter.getItem(position)));
+        adapter.setOnRvItemClickListener((itemView, position) -> {
+            Intent intent = new Intent(this, EquipmentDataActivity.class);
+            intent.putExtra("object",mmac.get(position));
+            //将需要显示波形的ip存入sp中
+            intent.putExtra("ip",mip.get(position));
+            SharedPreferences.Editor edit = getSharedPreferences("data", MODE_PRIVATE).edit();
+            edit.putString("ip",mip.get(position));
+            edit.apply();
 
-        laodData();
+            startActivity(intent);
+            //TODO 向TCP服务传入需要显示波形的IP地址
+
+        });
+//        adapter.setOnRvItemClickListener((itemView, position) ->
+//                startAcitvity(EquipmentDataActivity.class, adapter.getItem(position)));
+
+        mIpScanner = new IpScanner();
+        mIpScanner.startScan();
+        mIpScanner.setOnScanListener((resultMap, mac, ip) -> {
+            mmac=mac;
+            mip=ip;
+        });
     }
 
     /**
@@ -68,7 +98,11 @@ public class HighMeasure extends BaseActivity {
     @Override
     protected void laodData() {
         //TODO 添加自己的动态数据
-        datas = Constants.Object.getEquipments();
+        //datas = Constants.Object.getEquipments();
+        datas.clear();
+        for (int i = 0; i < mmac.size(); i++) {
+            datas.add(new Equipment(mmac.get(i),0));
+        }
         adapter.setDatas(datas);
     }
 
@@ -78,7 +112,7 @@ public class HighMeasure extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        laodData();
+        //laodData();
     }
 
     @OnClick(R.id.part_right_menu_back)
@@ -132,16 +166,31 @@ public class HighMeasure extends BaseActivity {
     @OnClick(R.id.controler_start)
     void start(View view) {
         showToast("start");
+        //存入开始数据的标志
+        //TODO
+        setFlag(true);
+
+        //使全部节点变成测量状态
+        for (int i = 0; i < datas.size(); i++) {
+            datas.get(i).setStatus(1);
+        }
+        adapter.notifyDataSetChanged();
     }
 
     /**
      * 暂停 点击
-     *
      * @param view
      */
     @OnClick(R.id.controler_pause)
     void pause(View view) {
         showToast("pause");
+        setFlag(false);
+        stopService(new Intent(HighMeasure.this, TcpService.class));
+        //使全部节点变成测量状态
+        for (int i = 0; i < datas.size(); i++) {
+            datas.get(i).setStatus(2);
+        }
+        adapter.notifyDataSetChanged();
     }
 
     /**
@@ -152,6 +201,13 @@ public class HighMeasure extends BaseActivity {
     @OnClick(R.id.controler_stop)
     void stop(View view) {
         showToast("stop");
+        setFlag(false);
+        stopService(new Intent(HighMeasure.this, TcpService.class));
+        //使全部节点变成测量状态
+        for (int i = 0; i < datas.size(); i++) {
+            datas.get(i).setStatus(0);
+        }
+        adapter.notifyDataSetChanged();
     }
 
     /**
@@ -162,5 +218,24 @@ public class HighMeasure extends BaseActivity {
     @OnClick(R.id.controler_reset)
     void reset(View view) {
         showToast("reset");
+        mIpScanner.startScan();
+        laodData();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        setFlag(false);
+        stopService(new Intent(HighMeasure.this, TcpService.class));
+    }
+
+    /**
+     * 用来通知是否开始存储tcp服务器的数据
+     * @param b true 存储 false 不存储
+     */
+    private void setFlag(boolean b){
+        SharedPreferences.Editor flag = getSharedPreferences("flag", MODE_PRIVATE).edit();
+        flag.putBoolean("flag",b);
+        flag.apply();
     }
 }
