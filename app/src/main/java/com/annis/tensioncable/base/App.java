@@ -1,9 +1,10 @@
 package com.annis.tensioncable.base;
 
-import android.app.Application;
 import android.support.multidex.MultiDex;
 
-public class App extends Application {
+import org.litepal.LitePalApplication;
+
+public class App extends LitePalApplication {
 
     @Override
     public void onCreate() {

@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
-    buildToolsVersion '28.0.1'
+    buildToolsVersion '28.0.2'
     defaultConfig {
         applicationId "com.annis.tensioncable"
         minSdkVersion 19
@@ -20,16 +20,16 @@ android {
 
     signingConfigs {
         debug {
-            keyAlias '索力项目'
-            keyPassword 'tensioncable123'
-            storeFile file('../storekey/debug.jks')
-            storePassword 'tensioncable123'
+            keyAlias 'suoli'
+            keyPassword 'zl2674803392'
+            storeFile file('zidinyi.jks')
+            storePassword '216030'
         }
         release {
-            keyAlias '索力项目'
-            keyPassword 'tensioncable123'
-            storeFile file('../storekey/debug.jks')
-            storePassword 'tensioncable123'
+            keyAlias 'suoli'
+            keyPassword 'zl2674803392'
+            storeFile file('zidinyi.jks')
+            storePassword '216030'
         }
     }
 
@@ -51,24 +51,39 @@ allprojects {
 }
 dependencies {
 
-
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(path: ':appbase')
 
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:5.1.6'
+
+    implementation 'com.yanzhenjie:recyclerview-swipe:1.1.4'
+
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 
+    //noinspection GradleDependency
     implementation 'androidx.appcompat:appcompat:1.0.0-rc01'
+    //noinspection GradleDependency
     implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
+    //noinspection GradleDependency
     implementation 'androidx.legacy:legacy-support-v4:1.0.0-rc01'
+    //noinspection GradleDependency
     implementation 'androidx.recyclerview:recyclerview:1.0.0-rc01'
+
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
+    androidTestImplementation 'androidx.test:runner:1.1.0-beta02'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-beta02'
+
     implementation 'com.jakewharton:butterknife:8.4.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
+
     implementation 'io.reactivex.rxjava2:rxjava:2.1.5'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+
     implementation 'com.android.support:multidex:1.0.3'
+
     implementation 'com.google.code.gson:gson:2.8.5'
+
+    implementation 'org.litepal.android:core:2.0.0'
+
     implementation files('libs/achartengine-1.1.0.jar')
 }

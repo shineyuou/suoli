@@ -1,6 +1,7 @@
 package com.annis.tensioncable.UI;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.hardware.SensorEvent;
@@ -13,12 +14,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.annis.appbase.base.BaseActivity;
 import com.annis.appbase.base.BasePresenter;
 import com.annis.appbase.base.TitleBean;
 import com.annis.tensioncable.My.Compare;
+import com.annis.tensioncable.My.filesize;
 import com.annis.tensioncable.R;
 import com.annis.tensioncable.Utils.Constants;
 import com.annis.tensioncable.Utils.ConstantsSP;
@@ -76,7 +80,7 @@ public class TelMeasure extends BaseActivity {
 
     private Integer limit_Time;
     private int Count = 0;
-    private File mfile;
+    private File mfile = null;
 
     private String filename;
 
@@ -214,7 +218,7 @@ public class TelMeasure extends BaseActivity {
     private void createView() {
         mChartView = ChartFactory.getCubeLineChartView(this, getDataSet(), getRender(), 0.3f);
         Char1.removeAllViews();
-        Char1.addView(mChartView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        Char1.addView(mChartView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
@@ -257,7 +261,7 @@ public class TelMeasure extends BaseActivity {
         mRenderer.setPointSize(5.5f);
         int yMin = -5;
         int yMax = 15;
-        String chartLineTitle = this.getString(R.string.ownchar1);
+        String chartLineTitle = "";
         setChartSettings(mRenderer, chartLineTitle, "", null/*yMessage*/, 0.0,
                 yMin, yMax, Color.BLACK, Color.BLACK);// 设置图表的X轴，Y轴,标题
         mRenderer.setXLabels(0);// 取消x轴的数字,动态设置
@@ -295,14 +299,14 @@ public class TelMeasure extends BaseActivity {
         renderer.setLabelsTextSize(40);//轴刻度文字大小
         renderer.setLegendTextSize(30);//图例文字的大小
         //renderer.setPointSize(5f);
-        renderer.setMargins(new int[]{0, 80, 0, 0});// 上,左,下,右
+        renderer.setMargins(new int[]{0, 50, 0, 0});// 上,左,下,右
         renderer.setMarginsColor(Color.argb(0, 255, 255, 255));//设置图标边框的颜色
 
         for (int i = 0; i < titles.length; i++) {
             XYSeriesRenderer r = new XYSeriesRenderer();
             r.setColor(colors[i]);
             r.setDisplayChartValues(false);//设置是否显示线上点的值
-            r.setLineWidth(2f);// 宽度
+            r.setLineWidth(4f);// 宽度
             r.setFillPoints(true);// 完全填充
             r.setChartValuesSpacing(0);
             renderer.addSeriesRenderer(r);
@@ -342,7 +346,16 @@ public class TelMeasure extends BaseActivity {
     //点击索力分析
     @OnClick(R.id.right_view)
     void back(View view) {
-        startAcitvity(SelectCableActivity.class,mfile.getPath());
+        if (mfile == null) {
+            Toast.makeText(this, "未检测到数据", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (filesize.getFileOrFilesSize(mfile.getPath(),
+                2) <= 5) {
+            Toast.makeText(this, "未检测到数据", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        startAcitvity(SelectCableActivity.class, mfile.getPath());
     }
 
     //开始
@@ -359,11 +372,11 @@ public class TelMeasure extends BaseActivity {
     @OnClick(R.id.controler_pause)
     void pause(View view) {
         SensorManager.unregisterListener(Listener, Sensor);
-        if (filename!=null&&Count!=(limit_Time * 200)){
+        if (filename != null && Count != (limit_Time * 200)) {
             mfile = new File(Environment.getExternalStorageDirectory() + "/1/手机", filename + ".csv");
             if (mfile.isFile() && mfile.exists()) {
                 mfile.delete();
-                filename=null;
+                filename = null;
             }
         }
         setStatus(2);
@@ -373,11 +386,11 @@ public class TelMeasure extends BaseActivity {
     @OnClick(R.id.controler_stop)
     void stop(View view) {
         SensorManager.unregisterListener(Listener, Sensor);
-        if (filename!=null&&Count!=(limit_Time * 200)){
+        if (filename != null && Count != (limit_Time * 200)) {
             mfile = new File(Environment.getExternalStorageDirectory() + "/1/手机", filename + ".csv");
             if (mfile.isFile() && mfile.exists()) {
                 mfile.delete();
-                filename=null;
+                filename = null;
             }
         }
         setStatus(0);
@@ -405,14 +418,16 @@ public class TelMeasure extends BaseActivity {
     //测量参数设置
     @OnClick(R.id.tel_measure_setting)
     void setConfig(View view) {
-        startAcitvity(MeasureConfigSetting.class,"false");
+        startAcitvity(MeasureConfigSetting.class, "false");
         right_menu.setVisibility(View.GONE);
     }
 
     //数据共享
     @OnClick(R.id.tel_data_share)
     void share(View view) {
-        startAcitvity(ShareActivtiy.class);
+        Intent intent = new Intent(this, ShareActivtiy.class);
+        intent.putExtra("source","手机测量");
+        startActivity(intent);
         right_menu.setVisibility(View.GONE);
     }
 

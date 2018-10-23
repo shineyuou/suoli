@@ -3,12 +3,14 @@ package com.annis.tensioncable.UI;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -16,12 +18,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.annis.appbase.base.BaseActivity;
 import com.annis.appbase.base.BasePresenter;
 import com.annis.appbase.base.TitleBean;
 import com.annis.tensioncable.My.Compare;
+import com.annis.tensioncable.My.IpUtils;
 import com.annis.tensioncable.R;
 import com.annis.tensioncable.Utils.Constants;
 import com.annis.tensioncable.Utils.ConstantsSP;
@@ -33,8 +35,10 @@ import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
+import org.litepal.LitePal;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -90,8 +94,6 @@ public class EquipmentDataActivity extends BaseActivity {
     Equipment item;
     String title = "振动数据";
     private String mMac;
-    private File mFile = null;
-    private Integer limit_Time;
 
     @Override
     protected int getLayout() {
@@ -101,14 +103,15 @@ public class EquipmentDataActivity extends BaseActivity {
     @Override
     protected TitleBean getMyTitle() {
         Intent intent = getIntent();
-        String ip = intent.getStringExtra("ip");
         mMac = intent.getStringExtra("object");
         title = mMac + "振动数据";
         TextView textView = new TextView(this);
         textView.setTextColor(Color.WHITE);
         textView.setText("索力分析");
         textView.setTextSize(16);
-        textView.setOnClickListener(v -> startAcitvity(SelectCableActivity.class, mFile.getPath()));
+        String path = new File(Environment.getExternalStorageDirectory() + "/1/节点",
+                mMac + ".csv").getPath();
+        textView.setOnClickListener(v -> startAcitvity(SelectCableActivity.class, path));
         return new TitleBean(title).setBack(true).setRightView(textView);
     }
 
@@ -118,13 +121,15 @@ public class EquipmentDataActivity extends BaseActivity {
             Bundle bundle = intent.getExtras();
             assert bundle != null;
             double count = bundle.getDouble("count");
-            try {
-                dealdata(count);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (count==(double)-1){
+                setStatus(0);
+            }else {
+                try {
+                    dealdata(count);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            //TODO 对传入的数据进行处理
-
         }
     }
 
@@ -138,15 +143,6 @@ public class EquipmentDataActivity extends BaseActivity {
 
         switch (status_flag) {
             case START:
-                String s = System.currentTimeMillis() + "," + data + "\n";
-                long now = System.currentTimeMillis();
-                FileOutputStream fos = new FileOutputStream(mFile, true);
-                fos.write(s.getBytes());
-                fos.close();
-                if (now >= End_time) {
-                    setStatus(STOP);
-                    break;
-                }
                 updatechart(data);
                 break;
             case STOP:
@@ -239,10 +235,10 @@ public class EquipmentDataActivity extends BaseActivity {
 
         receiver = new MyReceiver();
         IntentFilter filter = new IntentFilter();
-        filter.addAction("com.project.moli.demobroad.MyService");
+        filter.addAction("com.EquipmentDataActivity");
         EquipmentDataActivity.this.registerReceiver(receiver, filter);
 
-        setStatus(0);
+        setStatus(1);
 
         initview();
         createView();
@@ -401,7 +397,9 @@ public class EquipmentDataActivity extends BaseActivity {
      */
     @OnClick(R.id.tel_data_share)
     void share(View view) {
-        startAcitvity(ShareActivtiy.class);
+        Intent intent = new Intent(this, ShareActivtiy.class);
+        intent.putExtra("source","高精度测量");
+        startActivity(intent);
         right_menu.setVisibility(View.GONE);
     }
 
@@ -410,14 +408,15 @@ public class EquipmentDataActivity extends BaseActivity {
      */
     @OnClick(R.id.controler_start)
     void start() {
-        mFile = new File(getCacheDir(), mMac + ".csv");
-        boolean delete = mFile.delete();
-        Toast.makeText(this, "" + delete, Toast.LENGTH_SHORT).show();
+        setFlag(true);
 
-        mFile = new File(getCacheDir(), mMac + ".csv");
-        Start_time = System.currentTimeMillis();
-        limit_Time = ConstantsSP.getInstance(this).getValue(Constants.SP.MeasureTime, 10);
-        End_time = limit_Time * 1000 + Start_time;
+        List<IpUtils> ipUtils = LitePal.where("mac = ?", mMac).find(IpUtils.class);
+        Intent intent = new Intent();
+        intent.putExtra("ip", ipUtils.get(0).getIp());
+        intent.putExtra("flag",true);
+        intent.setAction("com.HighMeasure");
+        sendBroadcast(intent);
+
         setStatus(1);
     }
 
@@ -426,11 +425,28 @@ public class EquipmentDataActivity extends BaseActivity {
      */
     @OnClick(R.id.controler_pause)
     void pause() {
-        if (mFile != null && System.currentTimeMillis() < End_time) {
-            if (mFile.isFile() && mFile.exists()) {
-                mFile.delete();
+        File file = new File(Environment.getExternalStorageDirectory() + "/1/节点",
+                mMac + ".csv");
+        if (file.exists()){
+            try {
+                FileOutputStream fos = new FileOutputStream(file);
+                try {
+                    fos.write("".getBytes());
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
         }
+        setFlag(false);
+        List<IpUtils> ipUtils = LitePal.where("mac = ?", mMac).find(IpUtils.class);
+        Intent intent = new Intent();
+        intent.putExtra("ip", ipUtils.get(0).getIp());
+        intent.putExtra("flag",false);
+        intent.setAction("com.HighMeasure");
+        sendBroadcast(intent);
         setStatus(2);
     }
 
@@ -439,11 +455,28 @@ public class EquipmentDataActivity extends BaseActivity {
      */
     @OnClick(R.id.controler_stop)
     void stop() {
-        if (mFile != null && System.currentTimeMillis() < End_time) {
-            if (mFile.isFile() && mFile.exists()) {
-                mFile.delete();
+        File file = new File(Environment.getExternalStorageDirectory() + "/1/节点",
+                mMac + ".csv");
+        if (file.exists()){
+            try {
+                FileOutputStream fos = new FileOutputStream(file);
+                try {
+                    fos.write("".getBytes());
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
         }
+        setFlag(false);
+        List<IpUtils> ipUtils = LitePal.where("mac = ?", mMac).find(IpUtils.class);
+        Intent intent = new Intent();
+        intent.putExtra("ip", ipUtils.get(0).getIp());
+        intent.putExtra("flag",false);
+        intent.setAction("com.HighMeasure");
+        sendBroadcast(intent);
         setStatus(0);
     }
 
@@ -482,6 +515,18 @@ public class EquipmentDataActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         EquipmentDataActivity.this.unregisterReceiver(receiver);
-
+    }
+    /**
+     * 用来通知是否开始存储tcp服务器的数据
+     * @param b true 存储 false 不存储
+     */
+    private void setFlag(boolean b){
+        long start_time=System.currentTimeMillis();
+        long end_time=start_time+ConstantsSP.getInstance(this)
+                .getValue(Constants.SP.MeasureTime, 10)*1000;
+        ContentValues values = new ContentValues();
+        values.put("end_time",end_time);
+        values.put("flag",b);
+        LitePal.updateAll(IpUtils.class,values);
     }
 }

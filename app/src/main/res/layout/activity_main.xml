@@ -24,12 +24,6 @@
         android:paddingRight="10dp"
         app:layout_constraintTop_toBottomOf="@+id/top_image">
 
-        <Switch
-            android:id="@+id/switch2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Switch"/>
-
         <RelativeLayout
             android:id="@+id/tel_measure"
             android:layout_width="match_parent"
@@ -82,4 +76,8 @@
 
         </RelativeLayout>
     </LinearLayout>
+
+    <include
+        layout="@layout/part_right_menu_main"
+        android:visibility="gone"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">TensionCable</string>
     <string name="ownchar1">实时振动曲线图</string>
+    <string name="int_10">10</string>
 </resources>

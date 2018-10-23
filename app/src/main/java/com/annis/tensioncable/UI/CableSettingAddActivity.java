@@ -71,15 +71,15 @@ public class CableSettingAddActivity extends BaseActivity {
             showToast("请填写编号");
             return;
         }
-        if (TextUtils.isEmpty(numberStr)) {
+        if (TextUtils.isEmpty(lengthStr)) {
             showToast("请填写长度");
             return;
         }
-        if (TextUtils.isEmpty(numberStr)) {
+        if (TextUtils.isEmpty(areaStr)) {
             showToast("请填写截面积");
             return;
         }
-        if (TextUtils.isEmpty(numberStr)) {
+        if (TextUtils.isEmpty(densityStr)) {
             showToast("请填写密度");
             return;
         }

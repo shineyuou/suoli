@@ -48,7 +48,7 @@ public class CableSettingActivity extends BaseActivity {
     protected void initViewAndEvent() {
         if (getIntentObj() != null) {
             if (getIntentObj() instanceof Equipment) {
-                //TODO 如果代码走到这里来了,说明是通过设备页面来的
+                //如果代码走到这里来了,说明是通过设备页面来的
                 item = (Equipment) getIntentObj();
             }
         }
@@ -70,7 +70,6 @@ public class CableSettingActivity extends BaseActivity {
 
     @Override
     protected void laodData() {
-        //TODO 更换成动态数据
         cableList = Constants.Object.getTensionCables(this);
         adapter.setDatas(cableList);
     }
@@ -97,8 +96,6 @@ public class CableSettingActivity extends BaseActivity {
 
     /**
      * 删除 按钮点击
-     *
-     * @param view
      */
     @OnClick(R.id.cable_select_delete)
     void delete(View view) {
@@ -116,8 +113,6 @@ public class CableSettingActivity extends BaseActivity {
 
     /**
      * 全选
-     *
-     * @param view
      */
     @OnClick(R.id.cb_all)
     void all(View view) {

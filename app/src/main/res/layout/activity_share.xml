@@ -4,15 +4,10 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:text="数据文件列表"
-        android:textSize="@dimen/title_size" />
-    <androidx.recyclerview.widget.RecyclerView
+    <com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        tools:listitem="@layout/item_equipment_selector"
-        android:layout_height="wrap_content"/>
+        android:layout_height="match_parent">
+
+    </com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView>
 </LinearLayout>

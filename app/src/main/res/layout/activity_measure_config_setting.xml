@@ -19,9 +19,11 @@
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:layout_marginTop="15dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
-        <TextView
+        <EditText
             android:id="@+id/measure_time_et"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -30,11 +32,12 @@
             android:layout_toLeftOf="@+id/add_minus_1"
             android:background="@drawable/sp_border_0"
             android:gravity="center"
-            android:inputType="number"
             android:padding="5dp"
-            android:text="0S"
             android:textColor="#000"
-            android:textSize="@dimen/text_size" />
+            android:textSize="@dimen/text_size"
+            android:ems="10"
+            android:inputType="number"
+            android:text="@string/int_10"/>
 
         <include
             android:id="@+id/add_minus_1"

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.annis.appbase.base.BaseActivity;
 import com.annis.appbase.base.BasePresenter;
@@ -17,6 +18,7 @@ import butterknife.BindView;
 import butterknife.OnClick;
 
 public class MeasureConfigSetting extends BaseActivity {
+    private static final String TAG = "MeasureConfigSetting";
     @BindView(R.id.measure_time_et)
     TextView et_time;
     @BindView(R.id.tv_hz)
@@ -51,9 +53,9 @@ public class MeasureConfigSetting extends BaseActivity {
 
         time_container.findViewById(R.id.part_add).setOnClickListener(v -> setTime(5));
         time_container.findViewById(R.id.part_minus).setOnClickListener(v -> setTime(-5));
-        MeasureTime = ConstantsSP.getInstance(this).getValue(Constants.SP.MeasureTime, 0);
-        MeasureFrequency = ConstantsSP.getInstance(this).getValue(Constants.SP.MeasureFrequency, 0);
-        et_time.setText(MeasureTime + "S");
+        MeasureTime = ConstantsSP.getInstance(this).getValue(Constants.SP.MeasureTime, 20);
+        MeasureFrequency = ConstantsSP.getInstance(this).getValue(Constants.SP.MeasureFrequency, 10);
+        et_time.setText(MeasureTime+"");
         hz.setText("" + MeasureFrequency);
         if (flag!=null){
             seekBar.setProgress(200);
@@ -96,7 +98,7 @@ public class MeasureConfigSetting extends BaseActivity {
             return;
         }
         MeasureTime += item_step;
-        et_time.setText("" + MeasureTime + "S");
+        et_time.setText("" + MeasureTime);
     }
 
     /**
@@ -115,6 +117,12 @@ public class MeasureConfigSetting extends BaseActivity {
      */
     @OnClick(R.id.part_save)
     void save() {
+        String s = et_time.getText().toString();
+        if (s.equals("")){
+            Toast.makeText(MeasureConfigSetting.this,"时间不能为空",Toast.LENGTH_SHORT).show();
+            return;
+
+        }        MeasureTime=Integer.parseInt(s);
         ConstantsSP.getInstance(this).setValue(Constants.SP.MeasureFrequency, MeasureFrequency);
         ConstantsSP.getInstance(this).setValue(Constants.SP.MeasureTime, MeasureTime);
         showToast("保存成功");

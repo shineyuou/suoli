@@ -24,8 +24,7 @@ public class MyMarkerView extends MarkerView {
     @SuppressLint("ResourceType")
     public MyMarkerView(Context context, int layoutResource) {
         super(context, layoutResource);
-
-        tvContent = findViewById(R.id.tvContent);
+        tvContent =(TextView) findViewById(R.id.tvContent);
     }
 
     // callbacks everytime the MarkerView is redrawn, can be used to update the
